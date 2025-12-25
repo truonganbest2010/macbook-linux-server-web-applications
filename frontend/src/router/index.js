@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
 import DashboardView from '../views/dashboard/DashboardView.vue';
-import TodoAppView from '../views/dashboard/TodoAppView.vue';
-import UrlAppView from '../views/dashboard/UrlAppView.vue';
+import TodoAppView from '../views/todos/TodoAppView.vue';
+import UrlAppView from '../views/urls/UrlAppView.vue';
 
 const routes = [
     {
