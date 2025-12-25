@@ -1,8 +1,11 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
+import os
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./macbook-linux-server-web-applications.db"
+# Use /app/data for Docker, otherwise use the current directory
+db_path = os.environ.get('DB_PATH', './macbook-linux-server-web-applications.db')
+SQLALCHEMY_DATABASE_URL = f"sqlite:///{db_path}"
 
 # SQLite specific argument
 engine = create_engine(
