@@ -4,14 +4,17 @@ from sqlalchemy.ext.declarative import declarative_base
 import os
 
 # Use /app/data for Docker, otherwise use the current directory
-db_path = os.environ.get('DB_PATH', './macbook-linux-server-web-applications.db')
-SQLALCHEMY_DATABASE_URL = f"sqlite:///{db_path}"
+DATABASE_URL = os.environ.get('DATABASE_URL', 'sqlite:///./macbook-linux-server-web-applications.db')
 
-# SQLite specific argument
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
-    connect_args={"check_same_thread": False}
-)
+# Handle connection args different for SQLite vs PostgreSQL
+if DATABASE_URL.startswith("sqlite"):
+    engine = create_engine(
+        DATABASE_URL,
+        connect_args={"check_same_thread": False}
+    )
+else:
+    # PostgreSQL doesn't need check_same_thread
+    engine = create_engine(DATABASE_URL)
 
 # Create a configured "Session" class
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

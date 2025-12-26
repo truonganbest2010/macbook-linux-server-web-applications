@@ -1,4 +1,28 @@
 services:
+  # ============================================
+  # DATABASE - PostgreSQL
+  # ============================================
+  db:
+    image: postgres:15-alpine
+    container_name: meatbird-server-app-db
+    environment:
+      POSTGRES_USER: meatbird
+      POSTGRES_PASSWORD: meatbird_secret_123
+      POSTGRES_DB: meatbird
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - meatbird-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U meatbird"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ============================================
+  # BACKEND - FastAPI
+  # ============================================
   backend:
     build:
       context: ./backend
@@ -6,12 +30,18 @@ services:
     container_name: meatbird-server-app-backend
     ports:
       - "3030:3030"
-    volumes:
-      - ./data:/app/data
     environment:
-      - PYTHONUNBUFFERED=1
+      - DATABASE_URL=postgresql://meatbird:meatbird_secret_123@db:5432/meatbird
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - meatbird-network
     restart: unless-stopped
 
+  # ============================================
+  # FRONTEND - Vue.js + Nginx
+  # ============================================
   frontend:
     build:
       context: ./frontend
@@ -21,8 +51,20 @@ services:
       - "3000:80"
     depends_on:
       - backend
+    networks:
+      - meatbird-network
     restart: unless-stopped
 
+# ============================================
+# VOLUMES - Persistent Storage
+# ============================================
+volumes:
+  postgres_data:
+    name: meatbird_postgres_data
+
+# ============================================
+# NETWORKS
+# ============================================
 networks:
-  default:
-    name: meatbird-network
+  meatbird-network:
+    driver: bridge
