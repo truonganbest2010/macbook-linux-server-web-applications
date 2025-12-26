@@ -2,11 +2,13 @@ import { ref, onMounted } from 'vue'
 import api from '../../services/api'
 
 export function useDashboard() {
+
+  // Must match backend StatsResponse model
   const stats = ref({
     total_todos: 0,
     completed_todos: 0,
     pending_todos: 0,
-    total_urls: 0
+    total_yt_urls: 0
   })
   const loading = ref(true)
   const error = ref(null)

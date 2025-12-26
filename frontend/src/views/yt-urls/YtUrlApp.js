@@ -5,31 +5,38 @@ export function useYtUrlApp() {
   const ytUrlStore = useYtUrlStore()
 
   const showAddForm = ref(false)
-  const newUrl = ref({
+  const newYtUrl = ref({
+    url: '',
+    description: ''
+  })
+
+  // Edit modal state
+  const editModal = ref(null)
+  const editingYtUrl = ref({
+    id: null,
     url: '',
     description: ''
   })
 
   onMounted(() => {
-    ytUrlStore.fetchUrls()
+    ytUrlStore.fetchYtUrls()
   })
 
-  async function handleAddUrl() {
-    if (!newUrl.value.url.trim()) return
+  async function handleAddYtUrl() {
+    if (!newYtUrl.value.url.trim()) return
     
     await ytUrlStore.addYtUrl({
-      url: newUrl.value.url,
-      description: newUrl.value.description || null
+      url: newYtUrl.value.url,
+      description: newYtUrl.value.description || null
     })
     
-    // Reset form
-    newUrl.value = { url: '', description: '' }
+    newYtUrl.value = { url: '', description: '' }
     showAddForm.value = false
   }
 
-  async function toggleComplete(urlItem) {
-    await ytUrlStore.updateYtUrl(urlItem.id, { 
-      complete_status: !urlItem.complete_status 
+  async function toggleComplete(ytUrl) {
+    await ytUrlStore.updateYtUrl(ytUrl.id, { 
+      complete_status: !ytUrl.complete_status 
     })
   }
 
@@ -47,14 +54,41 @@ export function useYtUrlApp() {
     return new Date(dateString).toLocaleDateString()
   }
 
+  // Edit modal functions
+  function openEditModal(ytUrl) {
+    editingYtUrl.value = {
+      id: ytUrl.id,
+      url: ytUrl.url,
+      description: ytUrl.description || ''
+    }
+    editModal.value.open()
+  }
+
+  function closeEditModal() {
+    editModal.value.close()
+  }
+
+  async function saveEdit() {
+    await ytUrlStore.updateYtUrl(editingYtUrl.value.id, {
+      url: editingYtUrl.value.url,
+      description: editingYtUrl.value.description || null
+    })
+    closeEditModal()
+  }
+
   return {
     ytUrlStore,
     showAddForm,
-    newUrl,
-    handleAddUrl,
+    newYtUrl,
+    handleAddYtUrl,
     toggleComplete,
     handleDelete,
     openUrl,
-    formatDate
+    formatDate,
+    editModal,
+    editingYtUrl,
+    openEditModal,
+    closeEditModal,
+    saveEdit
   }
 }

@@ -5,16 +5,16 @@ export const useYtUrlStore = defineStore(
     'ytUrls',
     {
         state: () => ({
-            urls: [],
+            ytUrls: [],
             loading: false,
             error: null,
         }),
         actions: {
-            async fetchUrls() {
+            async fetchYtUrls() {
                 this.loading = true;
                 try {
                     const response = await api.get('/yt-urls');
-                    this.urls = response.data;
+                    this.ytUrls = response.data;
                     this.error = null;
                 } catch (error) {
                     this.error('Error fetching URLs');
@@ -27,7 +27,7 @@ export const useYtUrlStore = defineStore(
             async addYtUrl(ytUrl) {
                 try {
                     const response = await api.post('/yt-urls', ytUrl);
-                    this.urls.push(response.data);
+                    this.ytUrls.push(response.data);
                     return response.data;
                 } catch (error) {
                     this.error('Error adding URL');
@@ -38,7 +38,7 @@ export const useYtUrlStore = defineStore(
             async deleteYtUrl(id) {
                 try {
                     await api.delete(`/yt-urls/${id}`);
-                    this.urls = this.urls.filter(url => url.id !== id);
+                    this.ytUrls = this.ytUrls.filter(url => url.id !== id);
                 } catch (error) {
                     this.error('Error deleting URL');
                     throw error;
@@ -48,9 +48,9 @@ export const useYtUrlStore = defineStore(
             async updateYtUrl(id, updatedYtUrl) {
                 try {
                     const response = await api.put(`/yt-urls/${id}`, updatedYtUrl);
-                    const index = this.urls.findIndex(url => url.id === id);
+                    const index = this.ytUrls.findIndex(url => url.id === id);
                     if (index !== -1) {
-                        this.urls[index] = response.data;
+                        this.ytUrls[index] = response.data;
                     }
                     return response.data;
                 } catch (error) {

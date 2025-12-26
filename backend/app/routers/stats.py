@@ -12,7 +12,7 @@ router = APIRouter(
 )
 
 class StatsResponse(BaseModel):
-    total_urls: int
+    total_yt_urls: int
     total_todos: int
     pending_todos: int
     completed_todos: int
@@ -20,13 +20,13 @@ class StatsResponse(BaseModel):
 @router.get("", response_model=StatsResponse)
 def get_stats(db: Session = Depends(get_db)):
     """Retrieve application statistics."""
-    total_urls = db.query(YtURL).count()
+    total_yt_urls = db.query(YtURL).count()
     total_todos = db.query(Todo).count()
     pending_todos = db.query(Todo).filter(Todo.completed == False).count()
     completed_todos = db.query(Todo).filter(Todo.completed == True).count()
 
     return StatsResponse(
-        total_urls=total_urls,
+        total_yt_urls=total_yt_urls,
         total_todos=total_todos,
         pending_todos=pending_todos,
         completed_todos=completed_todos

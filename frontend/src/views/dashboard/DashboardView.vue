@@ -1,98 +1,112 @@
 <template>
   <div class="dashboard">
-    <h1 class="mb-4">Dashboard</h1>
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">Dashboard</h1>
 
     <!-- Loading State -->
-    <div v-if="loading" class="text-center py-5">
-      <div class="spinner-border" role="status">
-        <span class="visually-hidden">Loading...</span>
-      </div>
+    <div v-if="loading" class="flex justify-center py-12">
+      <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
     </div>
 
     <!-- Error State -->
-    <div v-else-if="error" class="alert alert-danger">
-      {{ error }}
-      <button class="btn btn-sm btn-outline-danger ms-2" @click="fetchStats">
+    <div v-else-if="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg flex items-center justify-between">
+      <span>{{ error }}</span>
+      <button 
+        @click="fetchStats"
+        class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition"
+      >
         Retry
       </button>
     </div>
 
     <!-- Stats Cards -->
-    <div v-else class="row">
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      
       <!-- Todos Card -->
-      <div class="col-md-6 mb-4">
-        <div class="card border-primary">
-          <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">📝 Todos</h5>
-          </div>
-          <div class="card-body">
-            <div class="row text-center">
-              <div class="col-4">
-                <h2 class="mb-0">{{ stats.total_todos }}</h2>
-                <small class="text-muted">Total</small>
-              </div>
-              <div class="col-4">
-                <h2 class="mb-0 text-success">{{ stats.completed_todos }}</h2>
-                <small class="text-muted">Done</small>
-              </div>
-              <div class="col-4">
-                <h2 class="mb-0 text-warning">{{ stats.pending_todos }}</h2>
-                <small class="text-muted">Pending</small>
-              </div>
+      <div class="bg-white rounded-xl shadow-md overflow-hidden border-l-4 border-blue-500">
+        <div class="bg-blue-500 text-white px-6 py-4">
+          <h5 class="text-lg font-semibold flex items-center gap-2">
+            📝 Todos
+          </h5>
+        </div>
+        <div class="p-6">
+          <div class="grid grid-cols-3 text-center mb-4">
+            <div>
+              <p class="text-3xl font-bold text-gray-800">{{ stats.total_todos }}</p>
+              <p class="text-sm text-gray-500">Total</p>
             </div>
-            <!-- Progress Bar -->
-            <div class="progress mt-3" style="height: 10px;">
-              <div 
-                class="progress-bar bg-success" 
-                role="progressbar"
-                :style="{ width: completionPercent + '%' }"
-              ></div>
+            <div>
+              <p class="text-3xl font-bold text-green-500">{{ stats.completed_todos }}</p>
+              <p class="text-sm text-gray-500">Done</p>
             </div>
-            <small class="text-muted">
-              {{ completionPercent }}% complete
-            </small>
+            <div>
+              <p class="text-3xl font-bold text-amber-500">{{ stats.pending_todos }}</p>
+              <p class="text-sm text-gray-500">Pending</p>
+            </div>
           </div>
-          <div class="card-footer">
-            <router-link to="/todos" class="btn btn-outline-primary btn-sm">
-              Go to Todos →
-            </router-link>
+          
+          <!-- Progress Bar -->
+          <div class="w-full bg-gray-200 rounded-full h-2.5 mb-2">
+            <div 
+              class="bg-green-500 h-2.5 rounded-full transition-all duration-500"
+              :style="{ width: completionPercent + '%' }"
+            ></div>
           </div>
+          <p class="text-sm text-gray-500">{{ completionPercent }}% complete</p>
+        </div>
+        <div class="px-6 py-4 bg-gray-50 border-t">
+          <router-link 
+            to="/todos" 
+            class="text-blue-500 hover:text-blue-700 font-medium text-sm transition"
+          >
+            Go to Todos →
+          </router-link>
         </div>
       </div>
 
-      <!-- URLs Card -->
-      <div class="col-md-6 mb-4">
-        <div class="card border-info">
-          <div class="card-header bg-info text-white">
-            <h5 class="mb-0">🔗 URLs</h5>
-          </div>
-          <div class="card-body text-center">
-            <h1 class="display-4 mb-0">{{ stats.total_urls }}</h1>
-            <p class="text-muted">Saved URLs</p>
-          </div>
-          <div class="card-footer">
-            <router-link to="/urls" class="btn btn-outline-info btn-sm">
-              Go to URLs →
-            </router-link>
-          </div>
+      <!-- YT URLs Card -->
+      <div class="bg-white rounded-xl shadow-md overflow-hidden border-l-4 border-cyan-500">
+        <div class="bg-cyan-500 text-white px-6 py-4">
+          <h5 class="text-lg font-semibold flex items-center gap-2">
+            🔗 YT URLs
+          </h5>
+        </div>
+        <div class="p-6 text-center">
+          <p class="text-5xl font-bold text-gray-800 mb-2">{{ stats.total_yt_urls }}</p>
+          <p class="text-gray-500">Saved URLs</p>
+        </div>
+        <div class="px-6 py-4 bg-gray-50 border-t">
+          <router-link 
+            to="/yt-urls" 
+            class="text-cyan-500 hover:text-cyan-700 font-medium text-sm transition"
+          >
+            Go to YT URLs →
+          </router-link>
         </div>
       </div>
+
     </div>
 
     <!-- Quick Actions -->
-    <div class="card mt-4">
-      <div class="card-header">
-        <h5 class="mb-0">Quick Actions</h5>
+    <div class="mt-8 bg-white rounded-xl shadow-md overflow-hidden">
+      <div class="px-6 py-4 border-b bg-gray-50">
+        <h5 class="font-semibold text-gray-800">Quick Actions</h5>
       </div>
-      <div class="card-body">
-        <router-link to="/todos" class="btn btn-primary me-2">
-          + New Todo
+      <div class="p-6 flex gap-4">
+        <router-link 
+          to="/todos" 
+          class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition flex items-center gap-2"
+        >
+          <span>+</span> New Todo
         </router-link>
-        <router-link to="/urls" class="btn btn-info">
-          + New URL
+        <router-link 
+          to="/yt-urls" 
+          class="bg-cyan-500 hover:bg-cyan-600 text-white px-4 py-2 rounded-lg transition flex items-center gap-2"
+        >
+          <span>+</span> New YT URL
         </router-link>
       </div>
     </div>
+
   </div>
 </template>
 
