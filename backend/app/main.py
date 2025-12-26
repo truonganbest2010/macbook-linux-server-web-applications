@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import urls, todos, stats
+from app.routers import yt_urls, todos, stats
 from app.database.db import engine, Base
 
 # Create all database tables
@@ -24,7 +24,7 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(urls.router)
+app.include_router(yt_urls.router)
 app.include_router(todos.router)
 app.include_router(stats.router)
 

@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
 from app.database.db import get_db
-from app.models.url import URL
+from app.models.yt_url import YtURL
 from app.models.todo import Todo
 
 router = APIRouter(
@@ -20,7 +20,7 @@ class StatsResponse(BaseModel):
 @router.get("", response_model=StatsResponse)
 def get_stats(db: Session = Depends(get_db)):
     """Retrieve application statistics."""
-    total_urls = db.query(URL).count()
+    total_urls = db.query(YtURL).count()
     total_todos = db.query(Todo).count()
     pending_todos = db.query(Todo).filter(Todo.completed == False).count()
     completed_todos = db.query(Todo).filter(Todo.completed == True).count()

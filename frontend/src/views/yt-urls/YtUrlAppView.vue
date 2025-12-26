@@ -37,26 +37,26 @@
     </div>
 
     <!-- Loading State -->
-    <div v-if="urlStore.loading" class="text-center py-4">
+    <div v-if="ytUrlStore.loading" class="text-center py-4">
       <div class="spinner-border" role="status">
         <span class="visually-hidden">Loading...</span>
       </div>
     </div>
 
     <!-- Error State -->
-    <div v-else-if="urlStore.error" class="alert alert-danger">
-      {{ urlStore.error }}
+    <div v-else-if="ytUrlStore.error" class="alert alert-danger">
+      {{ ytUrlStore.error }}
     </div>
 
     <!-- Empty State -->
-    <div v-else-if="urlStore.urls.length === 0" class="text-center py-5">
+    <div v-else-if="ytUrlStore.urls.length === 0" class="text-center py-5">
       <p class="text-muted">No URLs saved yet. Add one above!</p>
     </div>
 
     <!-- URL List -->
     <div v-else class="list-group">
       <div 
-        v-for="urlItem in urlStore.urls" 
+        v-for="urlItem in ytUrlStore.urls" 
         :key="urlItem.id"
         class="list-group-item d-flex justify-content-between align-items-start"
         :class="{ 'list-group-item-success': urlItem.complete_status }"
@@ -103,10 +103,10 @@
 </template>
 
 <script setup>
-import { useUrlApp } from './urlApp.js'
+import { useYtUrlApp } from './YtUrlApp.js'
 
 const {
-  urlStore,
+  ytUrlStore,
   showAddForm,
   newUrl,
   handleAddUrl,
@@ -114,5 +114,5 @@ const {
   handleDelete,
   openUrl,
   formatDate
-} = useUrlApp()
+} = useYtUrlApp()
 </script>

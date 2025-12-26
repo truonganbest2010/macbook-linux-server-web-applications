@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 
 import DashboardView from '../views/dashboard/DashboardView.vue';
 import TodoAppView from '../views/todos/TodoAppView.vue';
-import UrlAppView from '../views/urls/UrlAppView.vue';
+import YtUrlAppView from '../views/yt-urls/YtUrlAppView.vue';
 
 const routes = [
     {
@@ -16,9 +16,9 @@ const routes = [
         component: TodoAppView
     },
     {
-        path: '/urls',
-        name: 'urls',
-        component: UrlAppView
+        path: '/yt-urls',
+        name: 'ytUrls',
+        component: YtUrlAppView
     }
 ]
 

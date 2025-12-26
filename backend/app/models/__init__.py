@@ -1,4 +1,4 @@
 from .todo import Todo
-from .url import URL
+from .yt_url import YtURL
 
-__all__ = ["Todo", "URL"]
+__all__ = ["Todo", "YtURL"]

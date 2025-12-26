@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia';
 import api from '../services/api';
 
-export const useUrlStore = defineStore(
-    'urls',
+export const useYtUrlStore = defineStore(
+    'ytUrls',
     {
         state: () => ({
             urls: [],
@@ -13,7 +13,7 @@ export const useUrlStore = defineStore(
             async fetchUrls() {
                 this.loading = true;
                 try {
-                    const response = await api.get('/urls');
+                    const response = await api.get('/yt-urls');
                     this.urls = response.data;
                     this.error = null;
                 } catch (error) {
@@ -23,10 +23,10 @@ export const useUrlStore = defineStore(
                     this.loading = false;
                 }
             },
-            
-            async addUrl(url) {
+
+            async addYtUrl(ytUrl) {
                 try {
-                    const response = await api.post('/urls', url);
+                    const response = await api.post('/yt-urls', ytUrl);
                     this.urls.push(response.data);
                     return response.data;
                 } catch (error) {
@@ -35,9 +35,9 @@ export const useUrlStore = defineStore(
                 }
             },
 
-            async deleteUrl(id) {
+            async deleteYtUrl(id) {
                 try {
-                    await api.delete(`/urls/${id}`);
+                    await api.delete(`/yt-urls/${id}`);
                     this.urls = this.urls.filter(url => url.id !== id);
                 } catch (error) {
                     this.error('Error deleting URL');
@@ -45,9 +45,9 @@ export const useUrlStore = defineStore(
                 }
             },
 
-            async updateUrl(id, updatedUrl) {
+            async updateYtUrl(id, updatedYtUrl) {
                 try {
-                    const response = await api.put(`/urls/${id}`, updatedUrl);
+                    const response = await api.put(`/yt-urls/${id}`, updatedYtUrl);
                     const index = this.urls.findIndex(url => url.id === id);
                     if (index !== -1) {
                         this.urls[index] = response.data;

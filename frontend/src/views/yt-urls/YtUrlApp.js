@@ -1,8 +1,8 @@
 import { ref, onMounted } from 'vue'
-import { useUrlStore } from '../../stores/urlStore'
+import { useYtUrlStore } from '../../stores/ytUrlStore'
 
-export function useUrlApp() {
-  const urlStore = useUrlStore()
+export function useYtUrlApp() {
+  const ytUrlStore = useYtUrlStore()
 
   const showAddForm = ref(false)
   const newUrl = ref({
@@ -11,13 +11,13 @@ export function useUrlApp() {
   })
 
   onMounted(() => {
-    urlStore.fetchUrls()
+    ytUrlStore.fetchUrls()
   })
 
   async function handleAddUrl() {
     if (!newUrl.value.url.trim()) return
     
-    await urlStore.addUrl({
+    await ytUrlStore.addYtUrl({
       url: newUrl.value.url,
       description: newUrl.value.description || null
     })
@@ -28,14 +28,14 @@ export function useUrlApp() {
   }
 
   async function toggleComplete(urlItem) {
-    await urlStore.updateUrl(urlItem.id, { 
+    await ytUrlStore.updateYtUrl(urlItem.id, { 
       complete_status: !urlItem.complete_status 
     })
   }
 
   async function handleDelete(id) {
     if (confirm('Are you sure you want to delete this URL?')) {
-      await urlStore.deleteUrl(id)
+      await ytUrlStore.deleteYtUrl(id)
     }
   }
 
@@ -48,7 +48,7 @@ export function useUrlApp() {
   }
 
   return {
-    urlStore,
+    ytUrlStore,
     showAddForm,
     newUrl,
     handleAddUrl,
