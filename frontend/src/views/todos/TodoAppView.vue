@@ -60,58 +60,93 @@
 
     <!-- Todo List -->
     <div v-else class="list-group">
-      <div
-        v-for="todo in todoStore.todos"
+      <div 
+        v-for="todo in todoStore.todos" 
         :key="todo.id"
-        class="list-group-item d-flex justify-content-between align-items-start"
-        :class="{ 'list-group-item-success': todo.completed }"
+        class="list-group-item"
       >
-        <div class="d-flex align-items-start">
-          <input
-            type="checkbox"
-            class="form-check-input me-3 mt-1"
-            :checked="todo.completed"
-            @change="toggleComplete(todo)"
-          />
+        <!-- EDIT MODE -->
+        <div v-if="editingTodo && editingTodo.id === todo.id">
+          <div class="mb-2">
+            <input 
+              v-model="editingTodo.title" 
+              type="text" 
+              class="form-control mb-2"
+              placeholder="Title"
+            />
+            <textarea 
+              v-model="editingTodo.description" 
+              class="form-control mb-2"
+              placeholder="Description"
+              rows="2"
+            ></textarea>
+            <input 
+              v-model="editingTodo.category" 
+              type="text" 
+              class="form-control mb-2"
+              placeholder="Category"
+            />
+          </div>
+          <button class="btn btn-success btn-sm me-2" @click="saveEdit">
+            Save
+          </button>
+          <button class="btn btn-secondary btn-sm" @click="cancelEdit">
+            Cancel
+          </button>
+        </div>
+
+        <!-- NORMAL VIEW MODE -->
+        <div v-else class="d-flex justify-content-between align-items-start">
+          <div class="d-flex align-items-start">
+            <input 
+              type="checkbox" 
+              class="form-check-input me-3 mt-1"
+              :checked="todo.completed"
+              @change="toggleComplete(todo)"
+            />
+            <div>
+              <h5 class="mb-1" :class="{ 'text-decoration-line-through': todo.completed }">
+                {{ todo.title }}
+              </h5>
+              <p class="mb-1 text-muted" v-if="todo.description">
+                {{ todo.description }}
+              </p>
+              <small class="text-muted">
+                <span v-if="todo.category" class="badge bg-secondary me-2">
+                  {{ todo.category }}
+                </span>
+              </small>
+            </div>
+          </div>
           <div>
-            <h5
-              class="mb-1"
-              :class="{ 'text-decoration-line-through': todo.completed }"
-            >
-              {{ todo.title }}
-            </h5>
-            <p class="mb-1 text-muted" v-if="todo.description">
-              {{ todo.description }}
-            </p>
-            <small class="text-muted">
-              <span v-if="todo.category" class="badge bg-secondary me-2">
-                {{ todo.category }}
-              </span>
-              Created: {{ formatDate(todo.created_at) }}
-            </small>
+            <button class="btn btn-outline-primary btn-sm me-1" @click="startEdit(todo)">
+              Edit
+            </button>
+            <button class="btn btn-outline-danger btn-sm" @click="handleDelete(todo.id)">
+              Delete
+            </button>
           </div>
         </div>
-        <button
-          class="btn btn-outline-danger btn-sm"
-          @click="handleDelete(todo.id)"
-        >
-          Delete
-        </button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-  import { useTodoList } from './todoApp.js'
+  import { useTodoApp } from './todoApp.js'
 
   const {
-  todoStore,
-  showAddForm,
-  newTodo,
-  handleAddTodo,
-  toggleComplete,
-  handleDelete,
-  formatDate
-  } = useTodoList()
+    todoStore,
+    showAddForm,
+    newTodo,
+    handleAddTodo,
+    toggleComplete,
+    handleDelete,
+    formatDate,
+
+    editingTodo,
+    startEdit,
+    cancelEdit,
+    saveEdit
+  } = useTodoApp()
 </script>
