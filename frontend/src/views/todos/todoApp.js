@@ -5,47 +5,58 @@ export function useTodoApp() {
     const todoStore = useTodoStore()
 
     const showAddForm = ref(false)
-    const editingTodo = ref(null)
     const newTodo = ref({
         title: '',
         description: '',
         category: ''
         }
-    )
+    )       
+
+    const editModal = ref(null)
+    const editingTodo = ref({
+        id: null,
+        title: '',
+        description: '',
+        category: ''
+    })
 
     onMounted(() => {
         todoStore.fetchTodos()
     })
+    
+    // ==== Modal Edit (update todo) Functions ====
 
-    function startEdit(todo) {
+    // Start editing a todo
+    function openEditModal(todo) {
         // Copy the todo so we don't modify the original until save
         editingTodo.value = {
             id: todo.id,
             title: todo.title,
             description: todo.description,
-            category: todo.category,
-            completed: todo.completed,
+            category: todo.category
         }
+        editModal.value.open()
     }
 
-    function cancelEdit() {
+    // Cancel editing
+    function closeEditModal() {
+        editModal.value.close()
         editingTodo.value = null
     }
 
+    // Save edited todo
     async function saveEdit() {
-        if (!editingTodo.value) return
-
         // Call API to update todo item
         await todoStore.updateTodo(editingTodo.value.id, {
             title: editingTodo.value.title,
-            description: editingTodo.value.description,
-            category: editingTodo.value.category,
-            completed: editingTodo.value.completed
+            description: editingTodo.value.description || null,
+            category: editingTodo.value.category || null
         })
 
-        editingTodo.value = null
+        closeEditModal()
     }
 
+    // Add new todo
     async function handleAddTodo() {
         if (!newTodo.value.title.trim()) return
 
@@ -61,16 +72,19 @@ export function useTodoApp() {
 
     }
 
+    // Toggle complete status
     async function toggleComplete(todo) {
         await todoStore.updateTodo(todo.id, { completed: !todo.completed })
     }
 
+    // Delete todo
     async function handleDelete(id) {
         if (confirm('Are you sure you want to delete this todo?')) {
             await todoStore.deleteTodo(id)
         }
     }
 
+    // Format date
     function formatDate(dateString) {
         return new Date(dateString).toLocaleDateString()
     }
@@ -85,8 +99,9 @@ export function useTodoApp() {
         formatDate,
 
         editingTodo,
-        startEdit,
-        cancelEdit,
+        editModal,
+        openEditModal,
+        closeEditModal,
         saveEdit
     }
 }
