@@ -8,7 +8,9 @@ export function useDashboard() {
     total_todos: 0,
     completed_todos: 0,
     pending_todos: 0,
-    total_yt_urls: 0
+    total_yt_urls: 0,
+    completed_yt_urls: 0,
+    pending_yt_urls: 0
   })
   const loading = ref(true)
   const error = ref(null)

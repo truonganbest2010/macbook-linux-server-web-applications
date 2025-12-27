@@ -48,17 +48,17 @@
           <div class="w-full bg-gray-200 rounded-full h-2.5 mb-2">
             <div 
               class="bg-green-500 h-2.5 rounded-full transition-all duration-500"
-              :style="{ width: completionPercent + '%' }"
+              :style="{ width: todoCompletionPercent + '%' }"
             ></div>
           </div>
-          <p class="text-sm text-gray-500">{{ completionPercent }}% complete</p>
+          <p class="text-sm text-gray-500">{{ todoCompletionPercent }}% complete</p>
         </div>
         <div class="px-6 py-4 bg-gray-50 border-t">
           <router-link 
             to="/todos" 
             class="text-blue-500 hover:text-blue-700 font-medium text-sm transition"
           >
-            Go to Todos →
+            View Todos →
           </router-link>
         </div>
       </div>
@@ -67,19 +67,40 @@
       <div class="bg-white rounded-xl shadow-md overflow-hidden border-l-4 border-cyan-500">
         <div class="bg-cyan-500 text-white px-6 py-4">
           <h5 class="text-lg font-semibold flex items-center gap-2">
-            🔗 YT URLs
+            🎬 YouTube URLs
           </h5>
         </div>
-        <div class="p-6 text-center">
-          <p class="text-5xl font-bold text-gray-800 mb-2">{{ stats.total_yt_urls }}</p>
-          <p class="text-gray-500">Saved URLs</p>
+        <div class="p-6">
+          <div class="grid grid-cols-3 text-center mb-4">
+            <div>
+              <p class="text-3xl font-bold text-gray-800">{{ stats.total_yt_urls }}</p>
+              <p class="text-sm text-gray-500">Total</p>
+            </div>
+            <div>
+              <p class="text-3xl font-bold text-green-500">{{ stats.completed_yt_urls }}</p>
+              <p class="text-sm text-gray-500">Done</p>
+            </div>
+            <div>
+              <p class="text-3xl font-bold text-amber-500">{{ stats.pending_yt_urls }}</p>
+              <p class="text-sm text-gray-500">Pending</p>
+            </div>
+          </div>
+          
+          <!-- Progress Bar -->
+          <div class="w-full bg-gray-200 rounded-full h-2.5 mb-2">
+            <div 
+              class="bg-green-500 h-2.5 rounded-full transition-all duration-500"
+              :style="{ width: ytUrlCompletionPercent + '%' }"
+            ></div>
+          </div>
+          <p class="text-sm text-gray-500">{{ ytUrlCompletionPercent }}% complete</p>
         </div>
         <div class="px-6 py-4 bg-gray-50 border-t">
           <router-link 
             to="/yt-urls" 
             class="text-cyan-500 hover:text-cyan-700 font-medium text-sm transition"
           >
-            Go to YT URLs →
+            View URLs →
           </router-link>
         </div>
       </div>
@@ -102,7 +123,7 @@
           to="/yt-urls" 
           class="bg-cyan-500 hover:bg-cyan-600 text-white px-4 py-2 rounded-lg transition flex items-center gap-2"
         >
-          <span>+</span> New YT URL
+          <span>+</span> New URL
         </router-link>
       </div>
     </div>
@@ -116,8 +137,13 @@ import { useDashboard } from './dashboard.js'
 
 const { stats, loading, error, fetchStats } = useDashboard()
 
-const completionPercent = computed(() => {
+const todoCompletionPercent = computed(() => {
   if (stats.value.total_todos === 0) return 0
   return Math.round((stats.value.completed_todos / stats.value.total_todos) * 100)
+})
+
+const ytUrlCompletionPercent = computed(() => {
+  if (stats.value.total_yt_urls === 0) return 0
+  return Math.round((stats.value.completed_yt_urls / stats.value.total_yt_urls) * 100)
 })
 </script>

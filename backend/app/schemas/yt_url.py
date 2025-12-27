@@ -12,6 +12,7 @@ class YtURLCreate(YtURLBase):
 
 class YtURLUpdate(BaseModel):
     """Schema for updating an existing YouTube URL item."""
+    url: Optional[str] = None
     description: Optional[str] = None
     complete_status: Optional[bool] = None
 

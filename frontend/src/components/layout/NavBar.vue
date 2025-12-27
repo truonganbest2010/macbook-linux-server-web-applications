@@ -36,7 +36,7 @@
             :class="{ 'bg-gray-700 text-white': $route.name === 'ytUrls' }"
             @click="closeMenu"
           >
-            YT URLs
+            Youtube URLs
           </router-link>
         </div>
 

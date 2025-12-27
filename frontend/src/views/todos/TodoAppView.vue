@@ -2,7 +2,10 @@
   <div class="todos">
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
-      <h1 class="text-3xl font-bold text-gray-800">Todos</h1>
+      <h1 class="text-3xl font-bold text-gray-800">
+        Todos
+        <span class="text-lg font-normal text-gray-500">({{ todoStore.totalCount }})</span>
+      </h1>
       <button 
         @click="showAddForm = !showAddForm"
         class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition flex items-center gap-2"
@@ -73,76 +76,141 @@
     </div>
 
     <!-- Empty State -->
-    <div v-else-if="todoStore.todos.length === 0" class="text-center py-12">
+    <div v-else-if="!todoStore.todos || todoStore.todos.length === 0" class="text-center py-12">
       <div class="text-6xl mb-4">📝</div>
       <p class="text-gray-500">No todos yet. Add one above!</p>
     </div>
 
     <!-- Todo List -->
-    <div v-else class="space-y-3">
-      <div 
-        v-for="todo in todoStore.todos" 
-        :key="todo.id"
-        class="bg-white rounded-xl shadow-sm p-4 flex justify-between items-start transition hover:shadow-md"
-        :class="{ 'bg-green-50 border-l-4 border-green-500': todo.completed }"
-      >
-        <div class="flex items-start gap-3">
-          <!-- Checkbox -->
-          <input 
-            type="checkbox" 
-            class="mt-1 h-5 w-5 rounded border-gray-300 text-blue-500 focus:ring-blue-500 cursor-pointer"
-            :checked="todo.completed"
-            @change="toggleComplete(todo)"
-          />
-          
-          <!-- Content -->
-          <div>
-            <h5 
-              class="font-medium text-gray-800"
-              :class="{ 'line-through text-gray-400': todo.completed }"
+    <template v-else>
+      <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div 
+          v-for="(todo, index) in todoStore.todos" 
+          :key="todo.id"
+          class="border-b last:border-b-0"
+          :class="{ 'bg-green-50': todo.completed }"
+        >
+          <!-- Compact Row (always visible) -->
+          <div class="flex items-center px-4 py-3 gap-3">
+            <!-- Checkbox -->
+            <input 
+              type="checkbox" 
+              class="h-5 w-5 rounded border-gray-300 text-blue-500 focus:ring-blue-500 cursor-pointer flex-shrink-0"
+              :checked="todo.completed"
+              @change="toggleComplete(todo)"
+            />
+
+            <!-- Expand/Collapse Button -->
+            <button 
+              @click="toggleExpand(todo.id)"
+              class="text-gray-400 hover:text-gray-600 transition flex-shrink-0"
+              :class="{ 'rotate-90': isExpanded(todo.id) }"
             >
-              {{ todo.title }}
-            </h5>
-            <p v-if="todo.description" class="text-sm text-gray-500 mt-1">
-              {{ todo.description }}
-            </p>
-            <div class="flex items-center gap-2 mt-2">
+              <svg class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+
+            <!-- Title (main content) -->
+            <div 
+              class="flex-1 min-w-0 cursor-pointer"
+              @click="toggleExpand(todo.id)"
+            >
               <span 
-                v-if="todo.category" 
-                class="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full"
+                class="text-gray-800 truncate block"
+                :class="{ 'line-through text-gray-400': todo.completed }"
               >
-                {{ todo.category }}
-              </span>
-              <span class="text-xs text-gray-400">
-                {{ formatDate(todo.created_at) }}
+                {{ todo.title }}
               </span>
             </div>
-          </div>
-        </div>
 
-        <!-- Actions -->
-        <div class="flex gap-2">
-          <button 
-            @click="openEditModal(todo)"
-            class="text-blue-500 hover:text-blue-700 hover:bg-blue-50 p-2 rounded-lg transition"
-            title="Edit"
+            <!-- Category Badge -->
+            <span 
+              v-if="todo.category" 
+              class="hidden sm:inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full flex-shrink-0"
+            >
+              {{ todo.category }}
+            </span>
+
+            <!-- Date (hidden on mobile) -->
+            <span class="hidden md:block text-xs text-gray-400 flex-shrink-0">
+              {{ formatDate(todo.created_at) }}
+            </span>
+
+            <!-- Actions -->
+            <div class="flex gap-1 flex-shrink-0">
+              <button 
+                @click.stop="openEditModal(todo)"
+                class="text-blue-500 hover:text-blue-700 hover:bg-blue-50 p-1.5 rounded-lg transition"
+                title="Edit"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              </button>
+              <!-- Updated: pass todo object instead of just id -->
+              <button 
+                @click.stop="handleDelete(todo)"
+                class="text-red-500 hover:text-red-700 hover:bg-red-50 p-1.5 rounded-lg transition"
+                title="Delete"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Expanded Details (collapsible) -->
+          <Transition
+            enter-active-class="transition-all duration-200 ease-out"
+            enter-from-class="opacity-0 max-h-0"
+            enter-to-class="opacity-100 max-h-48"
+            leave-active-class="transition-all duration-150 ease-in"
+            leave-from-class="opacity-100 max-h-48"
+            leave-to-class="opacity-0 max-h-0"
           >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
-          </button>
-          <button 
-            @click="handleDelete(todo.id)"
-            class="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition"
-            title="Delete"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-          </button>
+            <div 
+              v-if="isExpanded(todo.id)" 
+              class="px-4 pb-4 pl-14 overflow-hidden"
+            >
+              <div class="bg-gray-50 rounded-lg p-3 space-y-2">
+                <!-- Description -->
+                <div v-if="todo.description">
+                  <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Description</p>
+                  <p class="text-gray-700 text-sm whitespace-pre-wrap">{{ todo.description }}</p>
+                </div>
+                <div v-else>
+                  <p class="text-gray-400 text-sm italic">No description</p>
+                </div>
+
+                <!-- Meta info (visible on mobile) -->
+                <div class="flex flex-wrap gap-2 pt-2 border-t border-gray-200">
+                  <span v-if="todo.category" class="sm:hidden bg-gray-200 text-gray-600 text-xs px-2 py-1 rounded-full">
+                    {{ todo.category }}
+                  </span>
+                  <span class="text-xs text-gray-400">
+                    Created: {{ formatDate(todo.created_at) }}
+                  </span>
+                  <span v-if="todo.completed" class="text-xs text-green-600">
+                    ✓ Completed
+                  </span>
+                </div>
+              </div>
+            </div>
+          </Transition>
         </div>
       </div>
-    </div>
+
+      <!-- Pagination -->
+      <Pagination
+        :current-page="todoStore.currentPage"
+        :total-items="todoStore.totalCount"
+        :per-page="todoStore.perPage"
+        @page-change="handlePageChange"
+        @per-page-change="handlePerPageChange"
+      />
+    </template>
 
     <!-- Edit Modal -->
     <BaseModal 
@@ -180,12 +248,23 @@
       </div>
     </BaseModal>
 
+    <!-- Delete Confirm Modal -->
+    <ConfirmModal
+      ref="confirmModal"
+      type="danger"
+      title="Delete Todo?"
+      :message="todoToDelete ? `Are you sure you want to delete '${todoToDelete.title}'? This action cannot be undone.` : 'This action cannot be undone.'"
+      confirm-text="Delete"
+      cancel-text="Keep it"
+    />
   </div>
 </template>
 
 <script setup>
 import { useTodoApp } from './todoApp.js'
 import BaseModal from '../../components/modal/BaseModal.vue'
+import ConfirmModal from '../../components/modal/ConfirmModal.vue'
+import Pagination from '../../components/pagination/Pagination.vue'
 
 const {
   todoStore,
@@ -195,10 +274,22 @@ const {
   toggleComplete,
   handleDelete,
   formatDate,
+  toggleExpand,
+  isExpanded,
   editModal,
   editingTodo,
   openEditModal,
   closeEditModal,
-  saveEdit
+  saveEdit,
+  handlePageChange,
+  handlePerPageChange,
+  confirmModal,
+  todoToDelete
 } = useTodoApp()
 </script>
+
+<style scoped>
+.rotate-90 {
+  transform: rotate(90deg);
+}
+</style>

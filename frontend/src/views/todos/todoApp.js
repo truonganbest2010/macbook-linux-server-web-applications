@@ -1,107 +1,135 @@
-import { ref, onMounted, compile } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useTodoStore } from '../../stores/todoStore'
 
 export function useTodoApp() {
-    const todoStore = useTodoStore()
+  const todoStore = useTodoStore()
 
-    const showAddForm = ref(false)
-    const newTodo = ref({
-        title: '',
-        description: '',
-        category: ''
-        }
-    )       
+  const showAddForm = ref(false)
+  const newTodo = ref({
+    title: '',
+    description: '',
+    category: ''
+  })
 
-    const editModal = ref(null)
-    const editingTodo = ref({
-        id: null,
-        title: '',
-        description: '',
-        category: ''
-    })
+  // Track which todos are expanded
+  const expandedTodos = ref(new Set())
 
-    onMounted(() => {
-        todoStore.fetchTodos()
+  // Edit modal state
+  const editModal = ref(null)
+  const editingTodo = ref({
+    id: null,
+    title: '',
+    description: '',
+    category: ''
+  })
+
+  // Delete confirm modal
+  const confirmModal = ref(null)
+  const todoToDelete = ref(null)
+
+  onMounted(() => {
+    todoStore.fetchTodos(1, todoStore.perPage)
+  })
+
+  async function handleAddTodo() {
+    if (!newTodo.value.title.trim()) return
+    
+    await todoStore.addTodo({
+      title: newTodo.value.title,
+      description: newTodo.value.description || null,
+      category: newTodo.value.category || null
     })
     
-    // ==== Modal Edit (update todo) Functions ====
+    newTodo.value = { title: '', description: '', category: '' }
+    showAddForm.value = false
+  }
 
-    // Start editing a todo
-    function openEditModal(todo) {
-        // Copy the todo so we don't modify the original until save
-        editingTodo.value = {
-            id: todo.id,
-            title: todo.title,
-            description: todo.description,
-            category: todo.category
-        }
-        editModal.value.open()
+  async function toggleComplete(todo) {
+    await todoStore.updateTodo(todo.id, { completed: !todo.completed })
+  }
+
+  // New delete with confirm modal
+  async function handleDelete(todo) {
+    todoToDelete.value = todo
+    const confirmed = await confirmModal.value.open()
+    
+    if (confirmed) {
+      await todoStore.deleteTodo(todo.id)
     }
+    
+    todoToDelete.value = null
+  }
 
-    // Cancel editing
-    function closeEditModal() {
-        editModal.value.close()
-        editingTodo.value = null
+  function formatDate(dateString) {
+    return new Date(dateString).toLocaleDateString()
+  }
+
+  // Toggle expanded state
+  function toggleExpand(todoId) {
+    if (expandedTodos.value.has(todoId)) {
+      expandedTodos.value.delete(todoId)
+    } else {
+      expandedTodos.value.add(todoId)
     }
+    expandedTodos.value = new Set(expandedTodos.value)
+  }
 
-    // Save edited todo
-    async function saveEdit() {
-        // Call API to update todo item
-        await todoStore.updateTodo(editingTodo.value.id, {
-            title: editingTodo.value.title,
-            description: editingTodo.value.description || null,
-            category: editingTodo.value.category || null
-        })
+  function isExpanded(todoId) {
+    return expandedTodos.value.has(todoId)
+  }
 
-        closeEditModal()
+  // Edit modal functions
+  function openEditModal(todo) {
+    editingTodo.value = {
+      id: todo.id,
+      title: todo.title,
+      description: todo.description || '',
+      category: todo.category || ''
     }
+    editModal.value.open()
+  }
 
-    // Add new todo
-    async function handleAddTodo() {
-        if (!newTodo.value.title.trim()) return
+  function closeEditModal() {
+    editModal.value.close()
+  }
 
-        await todoStore.addTodo({
-            title: newTodo.value.title,
-            description: newTodo.value.description || null,
-            category: newTodo.value.category || null
-        })
+  async function saveEdit() {
+    await todoStore.updateTodo(editingTodo.value.id, {
+      title: editingTodo.value.title,
+      description: editingTodo.value.description || null,
+      category: editingTodo.value.category || null
+    })
+    closeEditModal()
+  }
 
-        // Reset form
-        newTodo.value = { title: '', description: '', category: '' }
-        showAddForm.value = false
+  // Pagination handlers
+  function handlePageChange(page) {
+    todoStore.fetchTodos(page, todoStore.perPage)
+  }
 
-    }
+  function handlePerPageChange(perPage) {
+    todoStore.fetchTodos(1, perPage)
+  }
 
-    // Toggle complete status
-    async function toggleComplete(todo) {
-        await todoStore.updateTodo(todo.id, { completed: !todo.completed })
-    }
-
-    // Delete todo
-    async function handleDelete(id) {
-        if (confirm('Are you sure you want to delete this todo?')) {
-            await todoStore.deleteTodo(id)
-        }
-    }
-
-    // Format date
-    function formatDate(dateString) {
-        return new Date(dateString).toLocaleDateString()
-    }
-
-    return {
-        todoStore,
-        showAddForm,
-        newTodo,
-        handleAddTodo,
-        toggleComplete,
-        handleDelete,
-        formatDate,
-
-        editingTodo,
-        editModal,
-        openEditModal,
-        closeEditModal,
-        saveEdit
-    }
+  return {
+    todoStore,
+    showAddForm,
+    newTodo,
+    handleAddTodo,
+    toggleComplete,
+    handleDelete,
+    formatDate,
+    toggleExpand,
+    isExpanded,
+    editModal,
+    editingTodo,
+    openEditModal,
+    closeEditModal,
+    saveEdit,
+    handlePageChange,
+    handlePerPageChange,
+    // Confirm modal
+    confirmModal,
+    todoToDelete
+  }
 }

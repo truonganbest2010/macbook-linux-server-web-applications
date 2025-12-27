@@ -18,8 +18,12 @@ export function useYtUrlApp() {
     description: ''
   })
 
+  // Delete confirm modal
+  const confirmModal = ref(null)
+  const ytUrlToDelete = ref(null)
+
   onMounted(() => {
-    ytUrlStore.fetchYtUrls()
+    ytUrlStore.fetchYtUrls(1, ytUrlStore.perPage)
   })
 
   async function handleAddYtUrl() {
@@ -40,10 +44,15 @@ export function useYtUrlApp() {
     })
   }
 
-  async function handleDelete(id) {
-    if (confirm('Are you sure you want to delete this URL?')) {
-      await ytUrlStore.deleteYtUrl(id)
+  async function handleDelete(ytUrl) {
+    ytUrlToDelete.value = ytUrl
+    const confirmed = await confirmModal.value.open()
+    
+    if (confirmed) {
+      await ytUrlStore.deleteYtUrl(ytUrl.id)
     }
+    
+    ytUrlToDelete.value = null
   }
 
   function openUrl(url) {
@@ -76,6 +85,15 @@ export function useYtUrlApp() {
     closeEditModal()
   }
 
+  // Pagination handlers
+  function handlePageChange(page) {
+    ytUrlStore.fetchYtUrls(page, ytUrlStore.perPage)
+  }
+
+  function handlePerPageChange(perPage) {
+    ytUrlStore.fetchYtUrls(1, perPage)
+  }
+
   return {
     ytUrlStore,
     showAddForm,
@@ -85,10 +103,17 @@ export function useYtUrlApp() {
     handleDelete,
     openUrl,
     formatDate,
+    // Edit modal
     editModal,
     editingYtUrl,
     openEditModal,
     closeEditModal,
-    saveEdit
+    saveEdit,
+    // Confirm modal
+    confirmModal,
+    ytUrlToDelete,
+    // Pagination
+    handlePageChange,
+    handlePerPageChange
   }
 }
